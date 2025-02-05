@@ -1,5 +1,6 @@
 package demo.link_challenge.services;
 
+import demo.link_challenge.mappers.TransactionMapper;
 import demo.link_challenge.repository.TransactionRepository;
 import demo.link_challenge.dtos.TransactionDTO;
 import demo.link_challenge.models.TransactionModel;
@@ -22,14 +23,14 @@ public class TransactionService implements ITransactionService{
         transaction.setCurrency(transactionDTO.getCurrency());
         transaction.setStatus("PENDING");
         transaction = transactionRepository.save(transaction);
-        return new TransactionDTO(transaction.getId(), transaction.getAmount(), transaction.getCurrency(), transaction.getStatus());
+        return TransactionMapper.toDto(transaction);
     }
 
     @Override
     public TransactionDTO getTransaction(Long id) {
         TransactionModel transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        return new TransactionDTO(transaction.getId(), transaction.getAmount(), transaction.getCurrency(), transaction.getStatus());
+        return TransactionMapper.toDto(transaction);
     }
 
     @Override
@@ -37,7 +38,7 @@ public class TransactionService implements ITransactionService{
         List<TransactionModel> transactions = transactionRepository.findAll();
         List<TransactionDTO> transactionDTOs = new ArrayList<>();
         for (TransactionModel transaction : transactions) {
-            transactionDTOs.add(new TransactionDTO(transaction.getId(), transaction.getAmount(), transaction.getCurrency(), transaction.getStatus()));
+            transactionDTOs.add( TransactionMapper.toDto(transaction));
         }
         return transactionDTOs;
     }

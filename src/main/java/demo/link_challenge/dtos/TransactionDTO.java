@@ -12,5 +12,14 @@ public class TransactionDTO {
     private Double amount;
     private String currency;
     private String status;
-
+    private String type;
+    private String cardId;
+    private String merchantName;
+    private String merchantId;
+    private int mccCode;
+    private String bankCode;
+    private String recipientAccount;
+    private String senderId;
+    private String recipientId;
+    private String note;
 }
