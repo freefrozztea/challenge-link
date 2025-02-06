@@ -1,6 +1,7 @@
 package demo.link_challenge.mappers;
 
 import demo.link_challenge.dtos.TransactionDTO;
+import demo.link_challenge.enums.Currency;
 import demo.link_challenge.models.BankTransfer;
 import demo.link_challenge.models.CardPayment;
 import demo.link_challenge.models.P2PTransfer;
@@ -9,10 +10,10 @@ import demo.link_challenge.models.TransactionModel;
 public class TransactionMapper {
     public static TransactionDTO toDto(TransactionModel transaction) {
         TransactionDTO dto = new TransactionDTO();
-        //dto.setTransactionId(transaction.getTransactionId());
+        dto.setTransactionId(transaction.getTransactionId());
         dto.setId(transaction.getId());
         dto.setAmount(transaction.getAmount());
-        dto.setCurrency(transaction.getCurrency());
+        dto.setCurrency(String.valueOf(transaction.getCurrency()));
         dto.setStatus(transaction.getStatus());
         dto.setType(transaction.getClass().getSimpleName());
 
@@ -35,13 +36,13 @@ public class TransactionMapper {
     public static TransactionModel toEntity(TransactionDTO dto) {
         switch (dto.getType()) {
             case "CardPayment":
-                return new CardPayment(dto.getId(), dto.getAmount(), dto.getCurrency(), dto.getStatus(),
+                return new CardPayment(dto.getId(), dto.getTransactionId(), dto.getAmount(), Currency.valueOf(dto.getCurrency()), dto.getStatus(),
                         dto.getCardId(), dto.getMerchantName(), dto.getMerchantId(), dto.getMccCode());
             case "BankTransfer":
-                return new BankTransfer(dto.getId(), dto.getAmount(), dto.getCurrency(), dto.getStatus(),
+                return new BankTransfer(dto.getId(), dto.getTransactionId(), dto.getAmount(), Currency.valueOf(dto.getCurrency()), dto.getStatus(),
                         dto.getBankCode(), dto.getRecipientAccount());
             case "P2PTransfer":
-                return new P2PTransfer(dto.getId(), dto.getAmount(), dto.getCurrency(), dto.getStatus(),
+                return new P2PTransfer(dto.getId(), dto.getTransactionId(), dto.getAmount(), Currency.valueOf(dto.getCurrency()), dto.getStatus(),
                         dto.getSenderId(), dto.getRecipientId(), dto.getNote());
             default:
                 throw new IllegalArgumentException("Unknown transaction type: " + dto.getType());
