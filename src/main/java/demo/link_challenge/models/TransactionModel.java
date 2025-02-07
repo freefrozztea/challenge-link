@@ -1,56 +1,72 @@
 package demo.link_challenge.models;
 
-import demo.link_challenge.enums.Currency;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.UUID;
 
-@Getter
 @Entity
-@Setter
 @Inheritance(strategy = InheritanceType.JOINED)
-@AllArgsConstructor
-@NoArgsConstructor
-public class TransactionModel {
+public abstract class TransactionModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
+
     private UUID transactionId;
-    @NotNull
     private Double amount;
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private Currency currency;
+    private String currency;
     private String status;
+
+    public TransactionModel(Long id, UUID transactionId, Double amount, String currency, String status) {
+        this.id = id;
+        this.transactionId = transactionId;
+        this.amount = amount;
+        this.currency = currency;
+        this.status = status;
+    }
+
+    public TransactionModel() {
+
+    }
 
     public Long getId() {
         return id;
     }
 
-    public @NotNull UUID getTransactionId() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public UUID getTransactionId() {
         return transactionId;
     }
 
-    public @NotNull Double getAmount() {
+    public void setTransactionId(UUID transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public Double getAmount() {
         return amount;
     }
 
-    public @NotNull Currency getCurrency() {
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getCurrency() {
         return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public TransactionModel(Long id, UUID transactionId, Double amount, Currency currency, String status) {
-        this.id = id;
-        this.transactionId = transactionId;
-        this.amount = amount;
-        this.currency = currency;
+    public void setStatus(String status) {
         this.status = status;
     }
 }

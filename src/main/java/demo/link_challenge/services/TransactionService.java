@@ -1,6 +1,8 @@
 package demo.link_challenge.services;
 
 import demo.link_challenge.enums.Currency;
+import demo.link_challenge.exceptions.DuplicateTransactionException;
+import demo.link_challenge.exceptions.InvalidTransactionException;
 import demo.link_challenge.mappers.TransactionMapper;
 import demo.link_challenge.repository.TransactionRepository;
 import demo.link_challenge.dtos.TransactionDTO;
@@ -29,14 +31,7 @@ public class TransactionService implements ITransactionService{
 
     @Override
     public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
-        if (!idempotencyService.checkAndStore(transactionDTO.getTransactionId().toString())) {
-            throw new IllegalStateException("Duplicate transaction detected");
-        }
-
-        if (!currencyService.isSupportedCurrency(Currency.valueOf(transactionDTO.getCurrency()))) {
-            throw new IllegalArgumentException("Unsupported currency: " + transactionDTO.getCurrency());
-        }
-
+        validateTransaction(transactionDTO);
         TransactionModel transaction = TransactionMapper.toEntity(transactionDTO);
         transaction = transactionRepository.save(transaction);
         return TransactionMapper.toDto(transaction);
@@ -53,5 +48,19 @@ public class TransactionService implements ITransactionService{
     public List<TransactionDTO> getAllTransactions() {
         List<TransactionModel> transactions = transactionRepository.findAll();
         return transactions.stream().map(TransactionMapper::toDto).toList();
+    }
+
+    private void validateTransaction(TransactionDTO transactionDTO) {
+        if (!idempotencyService.checkAndStore(transactionDTO.getTransactionId().toString())) {
+            throw new DuplicateTransactionException("Duplicate transaction detected", transactionDTO.getTransactionId().toString());
+        }
+
+        if (transactionDTO.getAmount() <= 0) {
+            throw new InvalidTransactionException("The transaction amount must be greater than zero", "INVALID_AMOUNT");
+        }
+
+        if (!currencyService.isSupportedCurrency(Currency.valueOf(transactionDTO.getCurrency()))) {
+            throw new InvalidTransactionException("Unsupported currency: " + transactionDTO.getCurrency(), "UNSUPPORTED_CURRENCY");
+        }
     }
 }

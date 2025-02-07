@@ -1,5 +1,7 @@
 package demo.link_challenge.dtos;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,139 +12,49 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionDTO {
-    private Long id;
+    @NotNull(message = "Transaction ID cannot be null")
     private UUID transactionId;
+
+    @NotNull(message = "The amount cannot be zero")
+    @Positive(message = "The amount must be greater than zero")
     private Double amount;
+
+    @NotNull(message = "The currency cannot be null")
     private String currency;
-    private String status;
+
+    @NotNull(message = "Transaction type cannot be null")
     private String type;
-    private String cardId;
-    private String merchantName;
-    private String merchantId;
-    private int mccCode;
-    private String bankCode;
-    private String recipientAccount;
-    private String senderId;
-    private String recipientId;
-    private String note;
 
-    public Long getId() {
-        return this.id;
+    public @NotNull(message = "Transaction ID cannot be null") UUID getTransactionId() {
+        return transactionId;
     }
 
-    public UUID getTransactionId() {
-        return this.transactionId;
-    }
-
-    public Double getAmount() {
-        return this.amount;
-    }
-
-    public String getCurrency() {
-        return this.currency;
-    }
-
-    public String getStatus() {
-        return this.status;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public String getCardId() {
-        return this.cardId;
-    }
-
-    public String getMerchantName() {
-        return this.merchantName;
-    }
-
-    public String getMerchantId() {
-        return this.merchantId;
-    }
-
-    public int getMccCode() {
-        return this.mccCode;
-    }
-
-    public String getBankCode() {
-        return this.bankCode;
-    }
-
-    public String getRecipientAccount() {
-        return this.recipientAccount;
-    }
-
-    public String getSenderId() {
-        return this.senderId;
-    }
-
-    public String getRecipientId() {
-        return this.recipientId;
-    }
-
-    public String getNote() {
-        return this.note;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setTransactionId(UUID transactionId) {
+    public void setTransactionId(@NotNull(message = "Transaction ID cannot be null") UUID transactionId) {
         this.transactionId = transactionId;
     }
 
-    public void setAmount(Double amount) {
+    public @NotNull(message = "The amount cannot be zero") @Positive(message = "The amount must be greater than zero") Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(@NotNull(message = "The amount cannot be zero") @Positive(message = "The amount must be greater than zero") Double amount) {
         this.amount = amount;
     }
 
-    public void setCurrency(String currency) {
+    public @NotNull(message = "The currency cannot be null") String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(@NotNull(message = "The currency cannot be null") String currency) {
         this.currency = currency;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public @NotNull(message = "Transaction type cannot be null") String getType() {
+        return type;
     }
 
-    public void setType(String type) {
+    public void setType(@NotNull(message = "Transaction type cannot be null") String type) {
         this.type = type;
     }
 
-    public void setCardId(String cardId) {
-        this.cardId = cardId;
-    }
-
-    public void setMerchantName(String merchantName) {
-        this.merchantName = merchantName;
-    }
-
-    public void setMerchantId(String merchantId) {
-        this.merchantId = merchantId;
-    }
-
-    public void setMccCode(int mccCode) {
-        this.mccCode = mccCode;
-    }
-
-    public void setBankCode(String bankCode) {
-        this.bankCode = bankCode;
-    }
-
-    public void setRecipientAccount(String recipientAccount) {
-        this.recipientAccount = recipientAccount;
-    }
-
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
-
-    public void setRecipientId(String recipientId) {
-        this.recipientId = recipientId;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
 }

@@ -9,17 +9,13 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CardPayment extends TransactionModel {
     private String cardId;
     private String merchantName;
     private String merchantId;
     private int mccCode;
 
-    public CardPayment(Long id, UUID transactionId, Double amount, Currency currency, String status,
-                       String cardId, String merchantName, String merchantId, int mccCode) {
+    public CardPayment(Long id, UUID transactionId, Double amount, String currency, String status, String cardId, String merchantName, String merchantId, int mccCode) {
         super(id, transactionId, amount, currency, status);
         this.cardId = cardId;
         this.merchantName = merchantName;
@@ -27,19 +23,46 @@ public class CardPayment extends TransactionModel {
         this.mccCode = mccCode;
     }
 
+    public CardPayment(String cardId, String merchantName, String merchantId, int mccCode) {
+        this.cardId = cardId;
+        this.merchantName = merchantName;
+        this.merchantId = merchantId;
+        this.mccCode = mccCode;
+    }
+
+    public CardPayment() {
+
+    }
+
     public String getCardId() {
         return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
     }
 
     public String getMerchantName() {
         return merchantName;
     }
 
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
+
     public String getMerchantId() {
         return merchantId;
     }
 
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
+    }
+
     public int getMccCode() {
         return mccCode;
+    }
+
+    public void setMccCode(int mccCode) {
+        this.mccCode = mccCode;
     }
 }
