@@ -47,4 +47,9 @@ public class CardPaymentDTO extends TransactionDTO {
     public void setMccCode(@NotNull(message = "MCC code cannot be null") int mccCode) {
         this.mccCode = mccCode;
     }
+
+    @Override
+    public String getType() {
+        return "card";
+    }
 }

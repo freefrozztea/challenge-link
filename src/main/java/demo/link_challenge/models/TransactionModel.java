@@ -1,9 +1,12 @@
 package demo.link_challenge.models;
 
+import demo.link_challenge.enums.Currency;
+import demo.link_challenge.enums.TransactionStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -13,14 +16,20 @@ public abstract class TransactionModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private UUID transactionId;
+    private String userId;
     private Double amount;
-    private String currency;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
+    private LocalDateTime createdAt;
 
-    public TransactionModel(Long id, UUID transactionId, Double amount, String currency, String status) {
+    public TransactionModel(Long id, UUID transactionId, String userId, Double amount, Currency currency, TransactionStatus status) {
         this.id = id;
         this.transactionId = transactionId;
+        this.userId = userId;
         this.amount = amount;
         this.currency = currency;
         this.status = status;
@@ -54,19 +63,35 @@ public abstract class TransactionModel {
         this.amount = amount;
     }
 
-    public String getCurrency() {
+    public Currency getCurrency() {
         return currency;
     }
 
-    public void setCurrency(String currency) {
+    public void setCurrency(Currency currency) {
         this.currency = currency;
     }
 
-    public String getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TransactionStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

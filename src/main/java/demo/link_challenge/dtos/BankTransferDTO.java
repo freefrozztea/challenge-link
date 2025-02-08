@@ -24,4 +24,9 @@ public class BankTransferDTO extends TransactionDTO{
     public void setRecipientAccount(@NotNull(message = "The recipient's account cannot be null") String recipientAccount) {
         this.recipientAccount = recipientAccount;
     }
+
+    @Override
+    public String getType() {
+        return "card";
+    }
 }

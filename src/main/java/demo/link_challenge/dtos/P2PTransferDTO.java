@@ -34,4 +34,9 @@ public class P2PTransferDTO extends TransactionDTO{
     public void setNote(String note) {
         this.note = note;
     }
+
+    @Override
+    public String getType() {
+        return "card";
+    }
 }

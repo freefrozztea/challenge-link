@@ -13,7 +13,7 @@ public class BankTransfer extends TransactionModel{
     private String bankCode;
     private String recipientAccount;
 
-    public BankTransfer(Long id, UUID transactionId, Double amount, String currency, String status, String bankCode, String recipientAccount) {
+    public BankTransfer(Long id, UUID transactionId, Double amount, Currency currency, String status, String bankCode, String recipientAccount) {
         super(id, transactionId, amount, currency, status);
         this.bankCode = bankCode;
         this.recipientAccount = recipientAccount;

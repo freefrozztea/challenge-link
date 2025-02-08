@@ -29,8 +29,11 @@ public class CardPaymentStrategy implements ITransactionStrategy {
 
         CardPayment cardPayment = cardPaymentMapper.toEntity(cardPaymentDTO);
 
-        cardPayment.setStatus("PENDING");
-
         return cardPayment;
+    }
+
+    @Override
+    public TransactionDTO convertToDTO(TransactionModel entity) {
+        return cardPaymentMapper.toDto((CardPayment) entity);
     }
 }

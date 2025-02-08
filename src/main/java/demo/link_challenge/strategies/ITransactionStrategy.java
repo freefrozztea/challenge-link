@@ -5,4 +5,5 @@ import demo.link_challenge.models.TransactionModel;
 
 public interface ITransactionStrategy {
     TransactionModel process(TransactionDTO transactionDTO);
+    TransactionDTO convertToDTO(TransactionModel entity);
 }

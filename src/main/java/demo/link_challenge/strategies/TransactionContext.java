@@ -6,26 +6,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class TransactionContext {
     private final Map<String, ITransactionStrategy> strategies = new HashMap<>();
 
     @Autowired
-    public TransactionContext(CardPaymentStrategy cardPaymentStrategy,
-                              BankTransferStrategy bankTransferStrategy,
-                              P2PTransferStrategy p2pTransferStrategy) {
-        strategies.put("card", cardPaymentStrategy);
-        strategies.put("bank", bankTransferStrategy);
-        strategies.put("p2p", p2pTransferStrategy);
+    public TransactionContext(List<ITransactionStrategy> strategyList) {
+        strategies = strategyList.stream()
+                .collect(Collectors.toMap(
+                        s -> s.getClass().getAnnotation(TransactionTypeQualifier.class).value(),
+                        Function.identity()
+                ));
     }
 
-    public TransactionModel executeStrategy(String type, TransactionDTO transactionDTO) {
+    public TransactionModel executeStrategy(String type, TransactionDTO dto) {
         ITransactionStrategy strategy = strategies.get(type);
-        if (strategy == null) {
-            throw new IllegalArgumentException("Transaction type not supported: " + type);
-        }
-        return strategy.process(transactionDTO);
+        if (strategy == null) throw new UnsupportedTransactionTypeException(type);
+        return strategy.process(dto);
     }
 }

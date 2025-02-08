@@ -6,7 +6,10 @@ import demo.link_challenge.dtos.P2PTransferDTO;
 import demo.link_challenge.dtos.TransactionDTO;
 import demo.link_challenge.services.TransactionService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,33 +27,8 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createTransaction(            @RequestParam String type,
-                                                           @Valid @RequestBody TransactionDTO transactionDTO) {
-        if (transactionDTO.getTransactionId() == null) {
-            transactionDTO.setTransactionId(UUID.randomUUID());
-        }
-        switch (type.toLowerCase()) {
-            case "card":
-                if (!(transactionDTO instanceof CardPaymentDTO)) {
-                    throw new IllegalArgumentException("Tipo de transacción no coincide con el DTO proporcionado");
-                }
-                return ResponseEntity.ok(transactionService.createCardPayment((CardPaymentDTO) transactionDTO));
-
-            case "bank":
-                if (!(transactionDTO instanceof BankTransferDTO)) {
-                    throw new IllegalArgumentException("Tipo de transacción no coincide con el DTO proporcionado");
-                }
-                return ResponseEntity.ok(transactionService.createBankTransfer((BankTransferDTO) transactionDTO));
-
-            case "p2p":
-                if (!(transactionDTO instanceof P2PTransferDTO)) {
-                    throw new IllegalArgumentException("Tipo de transacción no coincide con el DTO proporcionado");
-                }
-                return ResponseEntity.ok(transactionService.createP2PTransfer((P2PTransferDTO) transactionDTO));
-
-            default:
-                throw new IllegalArgumentException("Unsupported transaction type: " + type);
-        }
+    public ResponseEntity<TransactionDTO> createTransaction( @Valid @RequestBody TransactionDTO transactionDTO ) {
+        return ResponseEntity.ok(transactionService.createTransaction(transactionDTO));
     }
 
     @GetMapping("/{id}")
@@ -59,8 +37,16 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionDTO>> getAllTransactions() {
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+    public ResponseEntity<Page<TransactionDTO>> getAllTransactions(
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        return ResponseEntity.ok(transactionService.getAllTransactions(pageable));
     }
 
     private void validateTransactionType(TransactionDTO transactionDTO) {

@@ -14,7 +14,7 @@ public class P2PTransfer extends TransactionModel {
     private String recipientId;
     private String note;
 
-    public P2PTransfer(Long id, UUID transactionId, Double amount, String currency, String status, String senderId, String recipientId, String note) {
+    public P2PTransfer(Long id, UUID transactionId, Double amount, Currency currency, String status, String senderId, String recipientId, String note) {
         super(id, transactionId, amount, currency, status);
         this.senderId = senderId;
         this.recipientId = recipientId;

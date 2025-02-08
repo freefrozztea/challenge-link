@@ -15,7 +15,7 @@ public class CardPayment extends TransactionModel {
     private String merchantId;
     private int mccCode;
 
-    public CardPayment(Long id, UUID transactionId, Double amount, String currency, String status, String cardId, String merchantName, String merchantId, int mccCode) {
+    public CardPayment(Long id, UUID transactionId, Double amount, Currency currency, String status, String cardId, String merchantName, String merchantId, int mccCode) {
         super(id, transactionId, amount, currency, status);
         this.cardId = cardId;
         this.merchantName = merchantName;

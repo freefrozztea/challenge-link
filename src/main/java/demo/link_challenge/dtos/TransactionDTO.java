@@ -1,5 +1,6 @@
 package demo.link_challenge.dtos;
 
+import demo.link_challenge.enums.Currency;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionDTO {
+public abstract class TransactionDTO {
     @NotNull(message = "Transaction ID cannot be null")
     private UUID transactionId;
 
@@ -20,14 +21,13 @@ public class TransactionDTO {
     private Double amount;
 
     @NotNull(message = "The currency cannot be null")
-    private String currency;
-
-    @NotNull(message = "Transaction type cannot be null")
-    private String type;
+    private Currency currency;
 
     public @NotNull(message = "Transaction ID cannot be null") UUID getTransactionId() {
         return transactionId;
     }
+
+    public abstract String getType();
 
     public void setTransactionId(@NotNull(message = "Transaction ID cannot be null") UUID transactionId) {
         this.transactionId = transactionId;
@@ -41,20 +41,12 @@ public class TransactionDTO {
         this.amount = amount;
     }
 
-    public @NotNull(message = "The currency cannot be null") String getCurrency() {
+    public @NotNull(message = "The currency cannot be null") Currency getCurrency() {
         return currency;
     }
 
-    public void setCurrency(@NotNull(message = "The currency cannot be null") String currency) {
+    public void setCurrency(@NotNull(message = "The currency cannot be null") Currency currency) {
         this.currency = currency;
-    }
-
-    public @NotNull(message = "Transaction type cannot be null") String getType() {
-        return type;
-    }
-
-    public void setType(@NotNull(message = "Transaction type cannot be null") String type) {
-        this.type = type;
     }
 
 }
