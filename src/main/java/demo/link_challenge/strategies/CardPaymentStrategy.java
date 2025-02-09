@@ -1,5 +1,6 @@
 package demo.link_challenge.strategies;
 
+import demo.link_challenge.annotations.TransactionTypeQualifier;
 import demo.link_challenge.dtos.CardPaymentDTO;
 import demo.link_challenge.dtos.TransactionDTO;
 import demo.link_challenge.exceptions.InvalidTransactionException;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@TransactionTypeQualifier("card")
 public class CardPaymentStrategy implements ITransactionStrategy {
 
     private final CardPaymentMapper cardPaymentMapper;
