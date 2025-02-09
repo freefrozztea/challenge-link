@@ -3,7 +3,7 @@ Esto es una solución propuesta al desafío de Link
 
 ## Arquitectura
 ### Diagrama de secuencia
-https://github.com/freefrozztea/challenge-link/blob/develop/diagrama-de-secuencia.png?raw=true
+Diagrama de secuencia(https://raw.githubusercontent.com/freefrozztea/challenge-link/refs/heads/develop/diagrama-de-secuencia.png)
 
 ## Decisiones Técnica
 ### Excepciones personalizados
