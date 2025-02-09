@@ -2,7 +2,8 @@
 Esto es una solución propuesta al desafío de Link
 
 ## Arquitectura
-
+### Diagrama de secuencia
+https://github.com/freefrozztea/challenge-link/blob/develop/diagrama-de-secuencia.png?raw=true
 
 ## Decisiones Técnica
 ### Excepciones personalizados
