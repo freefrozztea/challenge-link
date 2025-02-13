@@ -18,7 +18,9 @@ API RESTful para procesamiento de transacciones financieras que soporta:
 
 ## 🏗 Architecture
 ### Sequence Diagram
-![Sequence Diagram](https://raw.githubusercontent.com/freefrozztea/challenge-link/develop/diagrama-de-secuencia.png)
+![Sequence Diagram](https://raw.githubusercontent.com/freefrozztea/challenge-link/refs/heads/main/images/diagrama-de-secuencia.png)
+![Diagrama de Clases](https://raw.githubusercontent.com/freefrozztea/challenge-link/refs/heads/main/images/diagrama-clases-challenge-link.png)
+![Diagrama de Arquitectura](https://raw.githubusercontent.com/freefrozztea/challenge-link/refs/heads/main/images/arquitectura-software-link.drawio.png)
 
 ## ✨ Features
 - Multiple transaction types support
