@@ -2,27 +2,18 @@ package demo.link_challenge.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import demo.link_challenge.dtos.BankTransferDTO;
-import demo.link_challenge.dtos.CardPaymentDTO;
-import demo.link_challenge.dtos.P2PTransferDTO;
 import demo.link_challenge.enums.Currency;
 import demo.link_challenge.enums.TransactionStatus;
-import demo.link_challenge.exceptions.DuplicateTransactionException;
 import demo.link_challenge.exceptions.InvalidTransactionException;
 import demo.link_challenge.exceptions.TransactionFailedException;
-import demo.link_challenge.exceptions.TransactionNotFoundException;
 import demo.link_challenge.mappers.BankTransferMapper;
 import demo.link_challenge.mappers.CardPaymentMapper;
 import demo.link_challenge.mappers.P2PTransferMapper;
-import demo.link_challenge.mappers.TransactionMapper;
-import demo.link_challenge.models.BankTransfer;
-import demo.link_challenge.models.CardPayment;
-import demo.link_challenge.models.P2PTransfer;
 import demo.link_challenge.repository.TransactionRepository;
 import demo.link_challenge.dtos.TransactionDTO;
 import demo.link_challenge.models.TransactionModel;
 import demo.link_challenge.strategies.TransactionContext;
-import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,11 +21,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -45,20 +35,14 @@ public class TransactionService implements ITransactionService{
     private final ICurrencyService currencyService;
     private final TransactionContext transactionContext;
     private final RedisTemplate<String, String> redisTemplate;
-    private final BankTransferMapper bankTransferMapper;
-    private final CardPaymentMapper cardPaymentMapper;
-    private final P2PTransferMapper p2PTransferMapper;
     private final ObjectMapper objectMapper;
 
-    public TransactionService(TransactionRepository transactionRepository, IIdempotencyService idempotencyService, ICurrencyService currencyService, RedisTemplate<String, String> redisTemplate, TransactionContext transactionContext, RedisTemplate<String, String> redisTemplate1, BankTransferMapper bankTransferMapper, CardPaymentMapper cardPaymentMapper, P2PTransferMapper p2PTransferMapper, ObjectMapper objectMapper) {
+    public TransactionService(TransactionRepository transactionRepository, IIdempotencyService idempotencyService, ICurrencyService currencyService, RedisTemplate<String, String> redisTemplate, TransactionContext transactionContext, RedisTemplate<String, String> redisTemplate1, ObjectMapper objectMapper) {
         this.transactionRepository = transactionRepository;
         this.idempotencyService = idempotencyService;
         this.currencyService = currencyService;
         this.transactionContext = transactionContext;
         this.redisTemplate = redisTemplate1;
-        this.bankTransferMapper = bankTransferMapper;
-        this.cardPaymentMapper = cardPaymentMapper;
-        this.p2PTransferMapper = p2PTransferMapper;
         this.objectMapper = objectMapper;
     }
 
@@ -72,11 +56,13 @@ public class TransactionService implements ITransactionService{
         validateTransaction(transactionDTO);
         TransactionModel transaction = transactionContext.executeStrategy(transactionDTO.getType().toLowerCase(), transactionDTO);
         transaction.setStatus(TransactionStatus.PENDING);
+        transaction.setCreatedAt(LocalDateTime.now());
 
         try {
             TransactionModel savedTransaction = transactionRepository.save(transaction);
-            return convertToDTO(savedTransaction);
+            return transactionContext.executeStrategyDTO(savedTransaction.getType().toLowerCase(), savedTransaction);
         } catch (Exception ex) {
+            ex.printStackTrace();
             handleFailedTransaction(transactionDTO, ex);
             throw new TransactionFailedException("Error processing transaction", ex);
         }
@@ -84,10 +70,20 @@ public class TransactionService implements ITransactionService{
     }
 
     @Override
-    public TransactionDTO getTransaction(Long id) {
-        return transactionRepository.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+    @Cacheable(value = "transactions", key = "#id")
+    public TransactionDTO getTransaction(UUID id) {
+        System.out.println("llego acá al service");
+        System.out.println(id);
+        try {
+            TransactionModel transaction= transactionRepository.findByTransactionId(id);
+            TransactionDTO transactionDTO = transactionContext.executeStrategyDTO(transaction.getType().toLowerCase(), transaction);
+            System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(transactionDTO));
+            printTransactionDetails(transactionDTO);
+            return transactionDTO;
+        } catch (Exception ex){
+            ex.printStackTrace();
+            throw new TransactionFailedException("Error find transaction", ex);
+        }
     }
 
     @Override
@@ -99,14 +95,59 @@ public class TransactionService implements ITransactionService{
         if (type != null) spec = spec.and((root, query, cb) -> cb.equal(root.get("type"), type));
         if (status != null) spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
 
-        return transactionRepository.findAll(spec, pageable).map(this::convertToDTO);
+        try {
+            System.out.println("Filtros aplicados - userId: " + userId + ", type: " + type + ", status: " + status);
+
+            System.out.println("Pageable - page: " + pageable.getPageNumber() + ", size: " + pageable.getPageSize() + ", sort: " + pageable.getSort());
+
+            Page<TransactionModel> transactionPage = transactionRepository.findAll(spec, pageable);
+
+            Page<TransactionDTO> listTransactionDTO = transactionPage.map(transaction ->
+                transactionContext.executeStrategyDTO(transaction.getType().toLowerCase(), transaction));
+
+            return listTransactionDTO;
+        } catch (Exception ex){
+            ex.printStackTrace();
+            throw new TransactionFailedException("Error find transaction", ex);
+        }
+    }
+
+    public Page<TransactionDTO> getTransactionsByUserId(String userId, Pageable pageable) {
+        Page<TransactionModel> transactionPage = transactionRepository.findByUserId(userId, pageable);
+
+        Page<TransactionDTO> listTransactionDTO = transactionPage.map(transaction -> {
+            return transactionContext.executeStrategyDTO(transaction.getType().toLowerCase(), transaction);
+        });
+
+        return listTransactionDTO;
+    }
+
+    public Page<TransactionDTO> getTransactionsByStatus(String status, Pageable pageable) {
+        Page<TransactionModel> transactionPage = transactionRepository.findByStatus(status, pageable);
+
+        Page<TransactionDTO> listTransactionDTO = transactionPage.map(transaction -> {
+            return transactionContext.executeStrategyDTO(transaction.getType().toLowerCase(), transaction);
+        });
+
+        return listTransactionDTO;
+    }
+
+    public List<TransactionDTO> getTransactionsByDateRange(LocalDateTime start, LocalDateTime end) {
+
+        List<TransactionModel> transactionPage = transactionRepository.findByCreatedAtBetween(start, end);
+
+        List<TransactionDTO> listTransactionDTO = transactionPage.stream()
+                .map(transaction -> transactionContext.executeStrategyDTO(transaction.getType().toLowerCase(), transaction))
+                .toList();
+
+        return listTransactionDTO;
     }
 
     public void retryTransaction(TransactionDTO dto) {
-        TransactionModel entity = transactionContext.executeStrategy(dto.getType(), dto);
-        entity.setStatus(TransactionStatus.RETRYING);
-        transactionRepository.save(entity);
-        //paymentGateway.process(entity);
+        TransactionModel transaction = transactionContext.executeStrategy(dto.getType(), dto);
+        transaction.setStatus(TransactionStatus.RETRYING);
+        transactionRepository.save(transaction);
+        //paymentGateway.process(transaction);
     }
 
     private void validateTransaction(TransactionDTO transactionDTO) {
@@ -136,17 +177,6 @@ public class TransactionService implements ITransactionService{
         }
     }
 
-    private TransactionDTO convertToDTO(TransactionModel entity) {
-        if (entity instanceof CardPayment) {
-            return cardPaymentMapper.toDto((CardPayment) entity);
-        } else if (entity instanceof BankTransfer) {
-            return bankTransferMapper.toDto((BankTransfer) entity);
-        } else if (entity instanceof P2PTransfer) {
-            return p2PTransferMapper.toDto((P2PTransfer) entity);
-        }
-        throw new IllegalArgumentException("Unsupported entity type");
-    }
-
     private void handleFailedTransaction(TransactionDTO dto, Exception ex) {
         try {
             String transactionId = dto.getTransactionId() != null ? dto.getTransactionId().toString() : "unknown";
@@ -154,6 +184,29 @@ public class TransactionService implements ITransactionService{
             redisTemplate.opsForValue().set("failed:" + transactionId, jsonPayload);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize transaction", e);
+        }
+    }
+
+    public void printTransactionDetails(TransactionDTO transactionDTO) {
+        if (transactionDTO == null) {
+            System.out.println("transactionDTO es nulo");
+            return;
+        }
+
+        Class<?> clazz = transactionDTO.getClass();
+        System.out.println("Clase: " + clazz.getSimpleName());
+
+        while (clazz != null) {
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                try {
+                    Object value = field.get(transactionDTO);
+                    System.out.println(field.getName() + ": " + value);
+                } catch (IllegalAccessException e) {
+                    System.out.println(field.getName() + ": No se pudo acceder");
+                }
+            }
+            clazz = clazz.getSuperclass();
         }
     }
 }

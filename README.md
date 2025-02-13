@@ -1,54 +1,214 @@
-# challenge-link
-Esto es una solución propuesta al desafío de Link
+# Financial Transactions API - Challenge Solution
 
-## Arquitectura
-### Diagrama de secuencia
-Diagrama de secuencia(https://raw.githubusercontent.com/freefrozztea/challenge-link/refs/heads/develop/diagrama-de-secuencia.png)
+[![Java](https://img.shields.io/badge/Java-17%2B-blue)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.1.5-green)](https://spring.io/projects/spring-boot)
+[![Redis](https://img.shields.io/badge/Redis-7.x-red)](https://redis.io/)
 
-## Decisiones Técnica
-### Excepciones personalizados
-Agrego excepciones personalizadas ya que pérmiten manejar errores específicos inherentes a la lógica de negocio de forma clara y organizada.
+A robust solution for handling financial transactions with support for multiple payment methods and idempotent operations.
 
-### Patrón Strategy
-Uso el patrón Strategy para que el sistema pueda decidir la estrategia correcta según el tipo de transacción
+## 📋 Overview
+API RESTful para procesamiento de transacciones financieras que soporta:
+- Transferencias P2P
+- Pagos con tarjeta
+- Transferencias bancarias
+- Operaciones idempotentes
+- Validaciones de negocio
+- Paginación y filtrado avanzado
 
-### Generar un UUID para transactionId
-Se genera un UUID al crear una transacción del lado del Back, decido que es mejor manejarlo de este lado ya que es más seguro
 
-### Excepciones Globales
-Se maneja centralizadamente las excepciones. Esto para devolver respuestas consistentes en caso de errores
+## 🏗 Architecture
+### Sequence Diagram
+![Sequence Diagram](https://raw.githubusercontent.com/freefrozztea/challenge-link/develop/diagrama-de-secuencia.png)
 
-### Validación de los campos de entrada
+## ✨ Features
+- Multiple transaction types support
+- Idempotency key implementation
+- Redis caching layer
+- Advanced filtering and pagination
+- Currency validation system
+- Custom exception handling
+- API documentation (Swagger/OpenAPI)
+- Transactional operations
+- SOLID principles compliance
 
-### Agrego paginación y filtrado
-Ya que es requisito del desafío implemento Pageable de Spring Data
 
-### Inyección de dependencias
-Se maneja los services inyectando dependencias para poder cumplir con los principios SOLID
+### 🛡 Core Architecture
+1. **Custom Exceptions**  
+   Domain-specific exceptions (`TransactionFailedException`, `InvalidCurrencyException`) for better error handling.
 
-### Idempotencia y uso de Redis
-Implemento un Servicio IdempotencyService para evitar transacciones duplicadas. Se usa Redis para poder almacenar en memoria dicha transacción
+2. **Strategy Pattern**  
+   Implemented for transaction type handling:
+   ```java
+   public interface TransactionStrategy {
+       Transaction processTransaction(TransactionRequest request);
+   }
+   ```
+   
+3. Idempotency Service
+Redis-backed implementation to prevent duplicate transactions:
 
-### Enums para currency y validaciones de tipo de cambio
-Se implementa un enum para los tipos de moneda soportados y además se genera uns servicio para tratar de validar en caso de requerirlo a futuro
+```java
+Copy
+@Service
+public class IdempotencyService {
+private final RedisTemplate<String, String> redisTemplate;
 
-### Transaccionalidad
-Se implementa @Transactional en el servicio para la transaccionalidad
+    public boolean checkAndStoreIdempotencyKey(String key) {
+        // Redis operations
+    }
+}
+```
 
-### Implementacion de un model por cada tipo de transaccion
-Esto complejiza la consulta de todas las transacciones de un usuario ya que habria que ver cada tabla
-Pero lo mantuve así porque prioricé el no tener tantos campos con valores vacíos 
+4. UUID Generation
+Server-side UUID generation for transaction IDs ensuring uniqueness and security.
 
-### Implementación de un DTO por cada tipo de transacción
-Esto ayuda ya que el usuario va a llenar los campos de información según el tipo de transacción
+### 🔄 Transaction Management
+Spring @Transactional
+ACID-compliant operations for data consistency
 
-### Uso de MapStruct para mapear
-Ya que es un mapper que no es manual y evita errores manuales de mapeo
+### Currency Validation
+Enum-based validation system with expansion capabilities
 
-## Deuda técnica
-Aún no implemento patrón Saga para manejar transacciones distribuidas
-Aún no uso mensajería para garantizar la consistencia eventual --> Kafka
-Falta de caché para mejorar el rendimiento en operaciones de lectura --> @Cacheable
-No tengo un mecanismo para particionar datos por usuario o región
-Aún no tengo las pruebas unitarias y de integración implementadas
-Falta de documentación API --> Swagger u OpenAPI
+```java
+public enum Currency {
+USD, EUR, GBP, JPY
+}
+```
+
+### 📦 Data Modeling
+- Specialized Models
+- Dedicated models per transaction type (CardTransaction, BankTransfer, P2PTransfer)
+
+### DTO Pattern
+Type-specific DTOs with Jackson polymorphism:
+
+```java
+@JsonTypeInfo(use = Id.NAME, property = "type")
+@JsonSubTypes({
+@Type(value = CardPaymentDTO.class, name = "card"),
+@Type(value = BankTransferDTO.class, name = "bank")
+})
+public abstract class TransactionDTO { ... }
+```
+
+## ⚡ Performance
+- Pagination
+Spring Data Pageable implementation:
+
+```http
+GET /transactions?page=0&size=20&sort=amount,desc
+```
+
+-MapStruct Mapping
+Efficient DTO-Entity conversion:
+
+```java
+@Mapper(componentModel = "spring")
+public interface TransactionMapper {
+TransactionDTO toDto(Transaction transaction);
+}
+```
+
+## 🚀 Getting Started
+Prerequisites
+- Java 17+
+- Redis 7.x
+- Maven 3.8+
+
+## Installation
+1. Clone repository:
+```bash
+git clone https://github.com/your-repo/challenge-link.git
+```
+
+2. Configure Redis in application.yml:
+```yaml
+spring:
+   redis:
+   host: localhost
+   port: 6379
+```
+
+3. Run application:
+```bash
+mvn spring-boot:run
+```
+
+## 📄 API Documentation
+### Endpoint: Create Transaction
+- Crea una nueva transacción. El tipo de transacción (type) determina los campos adicionales requeridos.
+```bash
+curl --location 'http://localhost:8080/api/transactions' \
+--header 'Content-Type: application/json' \
+--header 'user: frozz' \
+--header 'Authorization: ••••••' \
+--data '{
+  "amount": 190.5,
+  "currency": "USD",
+  "user_id": "12345",
+  "type": "card",
+  "merchant": {
+    "name": "Amazon",
+    "merchant_id": "AMZ001"
+  },
+  "mcc_code": 5411,
+  "card_id": "1234-5678-9012"
+}'
+```
+
+Response Example: Card Payment (Success)
+```bash
+{
+  "transaction_id": "550e8400-e29b-41d4-a716-446655440000",
+  "amount": 190.5,
+  "currency": "USD",
+  "status": "PENDING",
+  "user_id": "12345",
+  "type": "card",
+  "merchant": {
+    "name": "Amazon",
+    "merchant_id": "AMZ001"
+  },
+  "mcc_code": 5411,
+  "card_id": "1234-5678-9012",
+  "created_at": "2025-02-13T11:09:57Z"
+}
+```
+
+Response Example: Error (Invalid Currency)
+```bash
+{"timestamp":"2025-02-13T15:09:33.0545678","status":400,"error":"Validation Error","message":"Invalid request content","path":"/api/transactions","details":{"amount":"The amount must be greater than zero"}}
+```
+
+Response Example: Error (Invalid Amount)
+```bash
+{"timestamp":"2025-02-13T15:09:33.0545678","status":400,"error":"Validation Error","message":"Invalid request content","path":"/api/transactions","details":{"amount":"The amount must be greater than zero"}}
+```
+
+### Endpoint get status Transaction by transaction id
+```bash
+curl --location 'http://localhost:8080/api/transactions/5ad28ca6-9115-4f0e-ae4a-1418a6952f1b'
+```
+
+### Endpoint get All Transactions by user id
+```bash
+curl --location 'http://localhost:8080/api/transactions?userId=12345&sort=amount%2Cdesc&page=0&size=20&=null'
+```
+
+La colección de postman para consulta:
+[Link-Challenge.postman_collection.json](Link-Challenge.postman_collection.json)
+
+## 📈 Future Improvements
+
+| Improvement Area           |             Proposed Solution              | Priority  |
+|:---------------------------|:------------------------------------------:|----------:|
+| � Distributed Transactions | Implement Saga Pattern with Axon Framework | ⚡ High      |
+| 🔄 Eventual Consistency    |         Add Kafka messaging layer          | 🟡 Medium    |
+| ⚡ Performance Optimization |    Implement Spring Cache (@Cacheable)     | ⚡ High      |
+| 🗂 Data Partitioning       |          Sharding by user/region           | 🟡 Medium    |
+| 🔒 Enhanced Security       |       Add OAuth2/JWT authentication        | 🔴 Critical  |
+| 📊 Monitoring              |       Integrate Prometheus + Grafana       | 🟡 Medium    |
+| 📄 Documentation           |        Integrate OpenAPI or Swagger        | 🟡 Medium    |
+## 📬 Contact
+
+[Felipe Alzamora] - [luisfalmi@gmail.com]

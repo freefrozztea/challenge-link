@@ -1,23 +1,17 @@
 package demo.link_challenge.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 
-public class P2PTransferDTO extends TransactionDTO{
-    @NotNull(message = "Sender ID cannot be null")
-    private String senderId;
+import java.io.Serializable;
+import java.util.UUID;
+
+public class P2PTransferDTO extends TransactionDTO implements Serializable {
 
     @NotNull(message = "Recipient ID cannot be null")
     private String recipientId;
 
     private String note;
-
-    public @NotNull(message = "Sender ID cannot be null") String getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(@NotNull(message = "Sender ID cannot be null") String senderId) {
-        this.senderId = senderId;
-    }
 
     public @NotNull(message = "Recipient ID cannot be null") String getRecipientId() {
         return recipientId;
@@ -37,6 +31,26 @@ public class P2PTransferDTO extends TransactionDTO{
 
     @Override
     public String getType() {
-        return "card";
+        return "p2p";
     }
+
+    @JsonProperty("transfer_id")
+    public UUID getTransferId() {
+        return super.getTransactionId();
+    }
+
+    public void setTransferId(UUID transferId) {
+        super.setTransactionId(transferId);
+    }
+
+    @NotNull(message = "User's id cannot be null")
+    @JsonProperty("sender_id")
+    public String getSenderId(){
+        return super.getUserId();
+    }
+
+    public void setSenderId(String senderId) {
+        super.setUserId(senderId);
+    }
+
 }

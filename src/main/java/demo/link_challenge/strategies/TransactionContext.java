@@ -33,4 +33,10 @@ public class TransactionContext {
         if (strategy == null) throw new UnsupportedTransactionTypeException(type);
         return strategy.process(dto);
     }
+
+    public TransactionDTO executeStrategyDTO(String type, TransactionModel model) {
+        ITransactionStrategy strategy = strategies.get(type);
+        if (strategy == null) throw new UnsupportedTransactionTypeException(type);
+        return strategy.convertToDTO(model);
+    }
 }

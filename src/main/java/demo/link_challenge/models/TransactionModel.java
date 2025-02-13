@@ -25,6 +25,7 @@ public abstract class TransactionModel {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
     private LocalDateTime createdAt;
+    private String type;
 
     public TransactionModel(Long id, UUID transactionId, String userId, Double amount, Currency currency, TransactionStatus status) {
         this.id = id;
@@ -93,5 +94,12 @@ public abstract class TransactionModel {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
     }
 }

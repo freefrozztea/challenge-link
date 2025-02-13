@@ -1,45 +1,82 @@
 package demo.link_challenge.config;
 
-import demo.link_challenge.exceptions.DuplicateTransactionException;
-import demo.link_challenge.exceptions.ErrorResponse;
-import demo.link_challenge.exceptions.InvalidTransactionException;
+import demo.link_challenge.exceptions.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public final ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        ErrorResponse error = new ErrorResponse("Invalid input", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        Map<String, String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        FieldError::getDefaultMessage
+                ));
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Error",
+                "Invalid request content",
+                request.getDescription(false).replace("uri=", ""),
+                errors
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public final ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
-        ErrorResponse error = new ErrorResponse("Transaction error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-    }
+    @ExceptionHandler({
+            InvalidTransactionException.class,
+            DuplicateTransactionException.class,
+            UnsupportedTransactionTypeException.class
+    })
+    public ResponseEntity<ErrorResponse> handleBusinessExceptions(RuntimeException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Business Rule Violation",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", ""),
+                null
+        );
 
-    @ExceptionHandler(InvalidTransactionException.class)
-    public final ResponseEntity<ErrorResponse> handleInvalidTransactionException(InvalidTransactionException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse("Invalid transaction", ex.getMessage(), ex.getErrorCode());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(DuplicateTransactionException.class)
-    public final ResponseEntity<ErrorResponse> handleDuplicateTransactionException(DuplicateTransactionException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse("Duplicate transaction", ex.getMessage(), "DUPLICATE_TRANSACTION");
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public final ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse("Internal server error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleGlobalExceptions(Exception ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "An unexpected error occurred",
+                request.getDescription(false).replace("uri=", ""),
+                null
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

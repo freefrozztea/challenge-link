@@ -1,10 +1,8 @@
 package demo.link_challenge.models;
 
 import demo.link_challenge.enums.Currency;
+import demo.link_challenge.enums.TransactionStatus;
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -15,8 +13,8 @@ public class CardPayment extends TransactionModel {
     private String merchantId;
     private int mccCode;
 
-    public CardPayment(Long id, UUID transactionId, Double amount, Currency currency, String status, String cardId, String merchantName, String merchantId, int mccCode) {
-        super(id, transactionId, amount, currency, status);
+    public CardPayment(Long id, UUID transactionId, String userId, Double amount, Currency currency, TransactionStatus status, String cardId, String merchantName, String merchantId, int mccCode) {
+        super(id, transactionId, userId, amount, currency, status);
         this.cardId = cardId;
         this.merchantName = merchantName;
         this.merchantId = merchantId;

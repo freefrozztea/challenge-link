@@ -1,10 +1,7 @@
 package demo.link_challenge.controllers;
 
-import demo.link_challenge.dtos.BankTransferDTO;
-import demo.link_challenge.dtos.CardPaymentDTO;
-import demo.link_challenge.dtos.P2PTransferDTO;
+import demo.link_challenge.application.TransactionApplicationService;
 import demo.link_challenge.dtos.TransactionDTO;
-import demo.link_challenge.services.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,19 +17,20 @@ import java.util.UUID;
 @RequestMapping("/transactions")
 public class TransactionController {
 
-    private final TransactionService transactionService;
-    public TransactionController(TransactionService transactionService) {
-        this.transactionService = transactionService;
+    private final TransactionApplicationService transactionApplicationServiceService;
+
+    public TransactionController(TransactionApplicationService transactionApplicationServiceService) {
+        this.transactionApplicationServiceService = transactionApplicationServiceService;
     }
 
     @PostMapping
     public ResponseEntity<TransactionDTO> createTransaction( @Valid @RequestBody TransactionDTO transactionDTO ) {
-        return ResponseEntity.ok(transactionService.createTransaction(transactionDTO));
+        return ResponseEntity.ok(transactionApplicationServiceService.createTransaction(transactionDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransactionDTO> getTransaction(@PathVariable Long id) {
-        return ResponseEntity.ok(transactionService.getTransaction(id));
+    public ResponseEntity<String> getTransaction(@PathVariable String id) {
+        return ResponseEntity.ok(transactionApplicationServiceService.getTransaction(UUID.fromString(id)));
     }
 
     @GetMapping
@@ -45,8 +42,12 @@ public class TransactionController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
-        return ResponseEntity.ok(transactionService.getAllTransactions(pageable));
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.fromString(sortParams[1]);
+        Sort.Order order = new Sort.Order(direction, sortParams[0]);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(order));
+        return ResponseEntity.ok(transactionApplicationServiceService.getAllTransactions(userId, type, status, pageable));
     }
 
     private void validateTransactionType(TransactionDTO transactionDTO) {

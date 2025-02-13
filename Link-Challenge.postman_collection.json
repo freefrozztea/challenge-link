@@ -1,0 +1,150 @@
+{
+	"info": {
+		"_postman_id": "7d485ba3-cf7e-4a8b-9f20-7a6354291859",
+		"name": "Link-Challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14886378",
+		"_collection_link": "https://galactic-sunset-77566.postman.co/workspace/Research-and-Studies~bf5b898f-8197-4e06-816d-213949cc7b1f/collection/14886378-7d485ba3-cf7e-4a8b-9f20-7a6354291859?action=share&source=collection_link&creator=14886378"
+	},
+	"item": [
+		{
+			"name": "create Transaction - Card Payment",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "test",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "frozz",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "user",
+						"value": "frozz",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"amount\": 100.5,\r\n  \"currency\": \"USD\",\r\n    \"user_id\": \"asd\",\r\n  \"type\": \"card_payment\",\r\n  \"merchant\": {\r\n    \"name\": \"Amazon\",\r\n    \"merchant_id\": \"AMZ001\"\r\n  },\r\n  \"mcc_code\": 5411,\r\n  \"card_id\": \"1234-5678-9012\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/transactions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"transactions"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \"http://localhost:8080/transactions\" -H \"Content-Type: application/json\" -d '{\r\n  \"amount\": 100.5,\r\n  \"currency\": \"USD\",\r\n  \"type\": \"CardPayment\",\r\n  \"cardId\": \"1234-5678-9012\",\r\n  \"merchantName\": \"Amazon\",\r\n  \"merchantId\": \"AMZ001\",\r\n  \"mccCode\": 5411\r\n}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "create Transaction - P2P Transfer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"amount\": 100.5,\r\n  \"currency\": \"USD\",\r\n  \"type\": \"CardPayment\",\r\n  \"cardId\": \"1234-5678-9012\",\r\n  \"merchantName\": \"Amazon\",\r\n  \"merchantId\": \"AMZ001\",\r\n  \"mccCode\": 5411\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/transactions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transactions"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \"http://localhost:8080/transactions\" -H \"Content-Type: application/json\" -d '{\r\n  \"amount\": 100.5,\r\n  \"currency\": \"USD\",\r\n  \"type\": \"CardPayment\",\r\n  \"cardId\": \"1234-5678-9012\",\r\n  \"merchantName\": \"Amazon\",\r\n  \"merchantId\": \"AMZ001\",\r\n  \"mccCode\": 5411\r\n}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "create Transaction - Bank Transfer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"amount\": 100.5,\r\n  \"currency\": \"USD\",\r\n  \"type\": \"CardPayment\",\r\n  \"cardId\": \"1234-5678-9012\",\r\n  \"merchantName\": \"Amazon\",\r\n  \"merchantId\": \"AMZ001\",\r\n  \"mccCode\": 5411\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/transactions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transactions"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \"http://localhost:8080/transactions\" -H \"Content-Type: application/json\" -d '{\r\n  \"amount\": 100.5,\r\n  \"currency\": \"USD\",\r\n  \"type\": \"CardPayment\",\r\n  \"cardId\": \"1234-5678-9012\",\r\n  \"merchantName\": \"Amazon\",\r\n  \"merchantId\": \"AMZ001\",\r\n  \"mccCode\": 5411\r\n}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "get transaction by transactionId",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "get All transactions by transactionId Copy",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

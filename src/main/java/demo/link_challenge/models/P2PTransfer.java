@@ -1,6 +1,7 @@
 package demo.link_challenge.models;
 
 import demo.link_challenge.enums.Currency;
+import demo.link_challenge.enums.TransactionStatus;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,8 +15,8 @@ public class P2PTransfer extends TransactionModel {
     private String recipientId;
     private String note;
 
-    public P2PTransfer(Long id, UUID transactionId, Double amount, Currency currency, String status, String senderId, String recipientId, String note) {
-        super(id, transactionId, amount, currency, status);
+    public P2PTransfer(Long id, UUID transactionId, String userId, Double amount, Currency currency, TransactionStatus status, String senderId, String recipientId, String note) {
+        super(id, transactionId, userId, amount, currency, status);
         this.senderId = senderId;
         this.recipientId = recipientId;
         this.note = note;

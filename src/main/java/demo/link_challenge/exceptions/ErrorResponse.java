@@ -1,39 +1,37 @@
 package demo.link_challenge.exceptions;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class ErrorResponse {
-    private String message;
-    private String details;
     private LocalDateTime timestamp;
-    private String errorCode;
+    private int status;
+    private String error;
+    private String message;
+    private String path;
+    private Map<String, String> details;
 
-    public ErrorResponse(String message, String details) {
+    public ErrorResponse(LocalDateTime timestamp, int status, String error,
+                    String message, String path, Map<String, String> details) {
+        this.timestamp = timestamp;
+        this.status = status;
+        this.error = error;
         this.message = message;
+        this.path = path;
         this.details = details;
-        this.timestamp = LocalDateTime.now();
     }
 
-    public ErrorResponse(String message, String details, String errorCode) {
-        this.message = message;
-        this.details = details;
-        this.timestamp = LocalDateTime.now();
-        this.errorCode = errorCode;
-    }
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public int getStatus() { return status; }
+    public String getError() { return error; }
+    public String getMessage() { return message; }
+    public String getPath() { return path; }
+    public Map<String, String> getDetails() { return details; }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public void setStatus(int status) { this.status = status; }
+    public void setError(String error) { this.error = error; }
+    public void setMessage(String message) { this.message = message; }
+    public void setPath(String path) { this.path = path; }
+    public void setDetails(Map<String, String> details) { this.details = details; }
 }

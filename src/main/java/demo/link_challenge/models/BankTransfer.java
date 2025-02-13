@@ -1,6 +1,7 @@
 package demo.link_challenge.models;
 
 import demo.link_challenge.enums.Currency;
+import demo.link_challenge.enums.TransactionStatus;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +14,8 @@ public class BankTransfer extends TransactionModel{
     private String bankCode;
     private String recipientAccount;
 
-    public BankTransfer(Long id, UUID transactionId, Double amount, Currency currency, String status, String bankCode, String recipientAccount) {
-        super(id, transactionId, amount, currency, status);
+    public BankTransfer(Long id, UUID transactionId, String userId, Double amount, Currency currency, TransactionStatus status, String bankCode, String recipientAccount) {
+        super(id, transactionId, userId, amount, currency, status);
         this.bankCode = bankCode;
         this.recipientAccount = recipientAccount;
     }

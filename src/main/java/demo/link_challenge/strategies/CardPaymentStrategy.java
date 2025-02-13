@@ -29,9 +29,7 @@ public class CardPaymentStrategy implements ITransactionStrategy {
             throw new InvalidTransactionException("Invalid MCC Code", "INVALID_MCC");
         }
 
-        CardPayment cardPayment = cardPaymentMapper.toEntity(cardPaymentDTO);
-
-        return cardPayment;
+        return cardPaymentMapper.toEntity(cardPaymentDTO);
     }
 
     @Override

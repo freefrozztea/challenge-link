@@ -1,8 +1,12 @@
 package demo.link_challenge.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 
-public class BankTransferDTO extends TransactionDTO{
+import java.io.Serializable;
+import java.util.UUID;
+
+public class BankTransferDTO extends TransactionDTO implements Serializable {
     @NotNull(message = "Bank code cannot be null")
     private String bankCode;
 
@@ -27,6 +31,27 @@ public class BankTransferDTO extends TransactionDTO{
 
     @Override
     public String getType() {
-        return "card";
+        return "bank";
     }
+
+    @JsonProperty("transaction_id")
+    public UUID getTransactionId() {
+        return super.getTransactionId();
+    }
+
+    public void setTransactionId(UUID transactionId) {
+        super.setTransactionId(transactionId);
+    }
+
+    @NotNull(message = "User's id cannot be null")
+    @JsonProperty("user_id")
+    public String userId(){
+        return super.getUserId();
+    }
+
+    public void setUserId(String userId) {
+        super.setUserId(userId);
+    }
+
+    public BankTransferDTO() {}
 }
